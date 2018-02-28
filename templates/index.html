@@ -1,0 +1,39 @@
+<html>
+  <head>
+    <link rel="shortcut icon" href="favicon.ico">
+    <title>Room Temperature</title>
+    <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/2.0.4/socket.io.js"></script>
+    <script type="text/javascript" charset="utf-8">
+      /* Pad the tempurature readings we get from the app. */
+      function pad(n, width, z) {
+        z = z || '0';
+        n = n + '';
+        return n.length >= width ? n : new Array(width - n.length + 1).join(z) + n;
+      }
+
+      const url = '{{ ipAddr }}';
+      const socket = io.connect(url);
+
+      /* Emit a connect event to the server to it gives us
+      an initial data reading from the sensor. */
+      socket.on('connect', () => {
+        socket.emit('connected');
+      });
+
+      /* Handle the data event and display the results
+      to the user. */
+      socket.on('data', (msg) => {
+        const today = new Date();
+        const h = pad(today.getHours(), 2);
+        const m = pad(today.getMinutes(), 2);
+        const s = pad(today.getSeconds(), 2);
+        document.getElementById('update').innerHTML = `Updated  ${h}:${m}:${s}`;
+        document.getElementById('data').innerHTML = `Temp:  ${Math.round(msg.temperature * 100) / 100} Humidity: ${Math.round(msg.humidity * 100) / 100}`;
+      });
+    </script>
+  </head>
+  <body>
+    <div id="data">Temp: --.- Humidity: --.-</div>
+    <div id="update">Updated --:--:--</div>
+  </body>
+</html>
